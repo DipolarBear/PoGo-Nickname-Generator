@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PoGo Nickname Generator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 16px;
+      max-width: 480px;
+      margin: auto;
+    }
+    h1 { font-size: 1.4em; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      font-size: 1em;
+      margin-top: 4px;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      font-size: 1.2em;
+      text-align: center;
+      user-select: all;
+    }
+  </style>
+</head>
+<body>
+
+<h1>PoGo Nickname Generator</h1>
+
+<label>
+  Friend Source
+  <select id="source">
+    <option value="local">Local</option>
+    <option value="pg">PokeGenie</option>
+  </select>
+</label>
+
+<label>
+  Friend Date
+  <input type="date" id="friendDate">
+</label>
+
+<div class="output" id="output">
+  Nickname appears here
+</div>
+
+<script>
+  const output = document.getElementById("output");
+
+  function update() {
+    output.textContent = "…";
+  }
+
+  document.querySelectorAll("input, select").forEach(el =>
+    el.addEventListener("change", update)
+  );
+</script>
+
+</body>
+</html>
