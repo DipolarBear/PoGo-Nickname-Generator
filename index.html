@@ -19,6 +19,13 @@
       font-size: 1em;
       margin-top: 4px;
     }
+    .inline {
+      display: flex;
+      gap: 12px;
+    }
+    .inline > div {
+      flex: 1;
+    }
     .output {
       margin-top: 20px;
       padding: 12px;
@@ -26,6 +33,10 @@
       font-size: 1.2em;
       text-align: center;
       user-select: all;
+    }
+    .hint {
+      font-size: 0.85em;
+      color: #555;
     }
   </style>
 </head>
@@ -46,20 +57,61 @@
   <input type="date" id="friendDate">
 </label>
 
+<label>
+  Best Friend Date (optional)
+  <input type="date" id="bestDate">
+</label>
+
+<label>
+  Forever Friend Date (optional)
+  <input type="month" id="foreverDate">
+</label>
+
+<div id="localBlock">
+  <label>
+    Locality (1–4 chars)
+    <input type="text" id="locality" maxlength="4">
+    <div class="hint">Warning if "PG"</div>
+  </label>
+</div>
+
+<div id="pgBlock" style="display:none">
+  <label>
+    Country
+    <select id="country">
+      <option value="">— Select —</option>
+    </select>
+  </label>
+
+  <label id="stateLabel" style="display:none">
+    State / Province
+    <select id="state"></select>
+  </label>
+</div>
+
+<label>
+  Status Conditions
+  <div class="inline">
+    <div><input type="checkbox" id="sx"> X</div>
+    <div><input type="checkbox" id="sy"> Y</div>
+    <div><input type="checkbox" id="sz"> Z</div>
+  </div>
+</label>
+
 <div class="output" id="output">
-  Nickname appears here
+  Nickname preview
 </div>
 
 <script>
-  const output = document.getElementById("output");
+  const source = document.getElementById("source");
+  const localBlock = document.getElementById("localBlock");
+  const pgBlock = document.getElementById("pgBlock");
 
-  function update() {
-    output.textContent = "…";
-  }
-
-  document.querySelectorAll("input, select").forEach(el =>
-    el.addEventListener("change", update)
-  );
+  source.addEventListener("change", () => {
+    const isPG = source.value === "pg";
+    localBlock.style.display = isPG ? "none" : "block";
+    pgBlock.style.display = isPG ? "block" : "none";
+  });
 </script>
 
 </body>
