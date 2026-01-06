@@ -52,7 +52,4 @@ countrySelect.addEventListener("change", e => {
   loadStates(e.target.value);
 });
 
-// 🔍 Sanity test (you can remove later)
-console.log("Glyph test:", y(2026), m(10), d(31));
-
 loadCountries();
