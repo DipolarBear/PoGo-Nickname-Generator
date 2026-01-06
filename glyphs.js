@@ -27,3 +27,14 @@ for (let i = 1; i <= 31; i++) {
     ? String.fromCharCode(0x2460 + i - 1)
     : String.fromCharCode(0x3251 + i - 21);
 }
+export function y(year) {
+  return YEAR_GLYPHS[year % 100] || "";
+}
+
+export function m(month) {
+  return MONTH_GLYPHS[month] || "";
+}
+
+export function d(day) {
+  return DAY_GLYPHS[day] || "";
+}
