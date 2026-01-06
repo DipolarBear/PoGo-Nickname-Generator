@@ -41,68 +41,80 @@
   </style>
 </head>
 <body>
+  <h1>PoGo Nickname Generator</h1>
 
-<h1>PoGo Nickname Generator</h1>
-
-<label>
-  Friend Source
-  <select id="source">
-    <option value="local">Local</option>
-    <option value="pg">PokeGenie</option>
-  </select>
-</label>
-
-<label>
-  Friend Date
-  <input type="date" id="friendDate">
-</label>
-
-<label>
-  Best Friend Date (optional)
-  <input type="date" id="bestDate">
-</label>
-
-<label>
-  Forever Friend Date (optional)
-  <input type="month" id="foreverDate">
-</label>
-
-<div id="localBlock">
+  <!-- Friend Type -->
   <label>
-    Locality (1–4 chars)
-    <input type="text" id="locality" maxlength="4">
-    <div class="hint">Warning if "PG"</div>
+    <input type="checkbox" id="isPG">
+    PokeGenie Friend
   </label>
-</div>
 
-<div id="pgBlock" style="display:none">
+  <hr>
+
+  <!-- Locality (Local friends only) -->
+  <div id="localityBlock">
+    <label>
+      Locality:
+      <input id="locality" maxlength="4" placeholder="Dav">
+    </label>
+  </div>
+
+  <!-- Country / State (PG only) -->
+  <div id="pgBlock" style="display:none">
+    <label>
+      Country:
+      <select id="country"></select>
+    </label>
+
+    <label id="stateLabel" style="display:none">
+      State / Province:
+      <select id="state"></select>
+    </label>
+  </div>
+
+  <hr>
+
+  <!-- Dates -->
   <label>
-    Country
-    <select id="country">
-      <option value="">— Select —</option>
+    Friend Date:
+    <input type="date" id="friendDate">
+  </label>
+
+  <label>
+    Best Friend Date:
+    <input type="date" id="bestDate">
+  </label>
+
+  <label>
+    Forever Friend Date:
+    <input type="month" id="foreverDate">
+  </label>
+
+  <hr>
+
+  <!-- Status -->
+  <label>
+    Status:
+    <select id="status">
+      <option value="">None</option>
+      <option value="X">X</option>
+      <option value="Y">Y</option>
+      <option value="Z">Z</option>
+      <option value="XY">XY</option>
+      <option value="XZ">XZ</option>
+      <option value="YZ">YZ</option>
     </select>
   </label>
 
-  <label id="stateLabel" style="display:none">
-    State / Province
-    <select id="state"></select>
-  </label>
-</div>
+  <hr>
 
-<label>
-  Status Conditions
-  <div class="inline">
-    <div><input type="checkbox" id="sx"> X</div>
-    <div><input type="checkbox" id="sy"> Y</div>
-    <div><input type="checkbox" id="sz"> Z</div>
+  <!-- Output -->
+  <div>
+    <strong>Nickname:</strong>
+    <span id="output"></span>
+    <span id="count"></span>
   </div>
-</label>
 
-<div class="output" id="output">
-  Nickname preview
-</div>
-
-<script type="module" src="main.js"></script>
-
+  <script type="module" src="./js/ui.js"></script>
 </body>
 </html>
