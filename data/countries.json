@@ -1,1 +1,14 @@
+[
+  { "code": "US", "name": "United States" },
+  { "code": "CA", "name": "Canada" },
+  { "code": "MX", "name": "Mexico" },
+  { "code": "AU", "name": "Australia" },
+  { "code": "JP", "name": "Japan" },
+  { "code": "DE", "name": "Germany" },
+  { "code": "FR", "name": "France" },
+  { "code": "BR", "name": "Brazil" },
+  { "code": "TW", "name": "Taiwan" },
+  { "code": "HK", "name": "Hong Kong" },
+  { "code": "MO", "name": "Macao" }
+]
 
