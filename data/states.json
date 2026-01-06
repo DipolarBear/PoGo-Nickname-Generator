@@ -1,1 +1,25 @@
+{
+  "US": [
+    { "code": "CA", "name": "California" },
+    { "code": "TX", "name": "Texas" },
+    { "code": "NY", "name": "New York" },
+    { "code": "FL", "name": "Florida" }
+  ],
+  "CA": [
+    { "code": "ON", "name": "Ontario" },
+    { "code": "BC", "name": "British Columbia" },
+    { "code": "AB", "name": "Alberta" }
+  ],
+  "AU": [
+    { "code": "NS", "name": "New South Wales" },
+    { "code": "VI", "name": "Victoria" },
+    { "code": "QL", "name": "Queensland" }
+  ],
+  "MX": [
+    { "code": "CM", "name": "Campeche" },
+    { "code": "JA", "name": "Jalisco" },
+    { "code": "NL", "name": "Nuevo León" },
+    { "code": "CX", "name": "Ciudad de México" }
+  ]
+}
 
