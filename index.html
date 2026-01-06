@@ -102,7 +102,23 @@
   Nickname preview
 </div>
 
-<script type="module" src="main.js"></script>
+//<script type="module" src="main.js"></script>
+<script type="module">
+  import { generateNickname } from "./js/nicknameEngine.js";
+
+  const testInput = {
+    isPokeGenie: false,
+    locality: "Dav",
+    country: null,
+    state: null,
+    friendDate: { y: 2025, m: 9, d: 21 },
+    bestFriendDate: { y: 2026, m: 1, d: 4 },
+    foreverFriendDate: null,
+    status: "XY"
+  };
+
+  console.log(generateNickname(testInput));
+</script>
 
 </body>
 </html>
