@@ -1,3 +1,5 @@
+console.log("UI loaded");
+
 import { generateNickname } from "./nicknameEngine.js";
 import { COUNTRIES } from "./data/countries.js";
 import { STATES } from "./data/states.js";
