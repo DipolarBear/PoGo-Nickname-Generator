@@ -103,21 +103,7 @@
 </div>
 
 <script>
-  const source = document.getElementById("source");
-  const localBlock = document.getElementById("localBlock");
-  const pgBlock = document.getElementById("pgBlock");
 
-  const countrySelect = document.getElementById("country");
-  const stateSelect = document.getElementById("state");
-  const stateLabel = document.getElementById("stateLabel");
-
-  source.addEventListener("change", () => {
-    const isPG = source.value === "pg";
-    localBlock.style.display = isPG ? "none" : "block";
-    pgBlock.style.display = isPG ? "block" : "none";
-  });
-
-  async function loadCountries() {
     const res = await fetch("data/countries.json");
     const countries = await res.json();
 
@@ -157,6 +143,7 @@ console.log(y(2026), m(10), d(31));
   loadCountries();
 </script>
 <script type="module" src="glyphs.js"></script>
+<script type="module" src="main.js"></script>
 
 
 </body>
