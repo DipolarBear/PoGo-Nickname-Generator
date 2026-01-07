@@ -1,3 +1,5 @@
+import { glyphDay, glyphMonth, glyphYear } from "./glyphs.js";
+
 /* =========================
    Glyph Maps
 ========================= */
