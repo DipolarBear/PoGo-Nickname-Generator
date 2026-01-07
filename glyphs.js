@@ -1,40 +1,31 @@
-// === YEAR GLYPHS (00–99) ===
-// Circled numbers: ①–⑳, ㉑–㉟
-const YEAR_GLYPHS = {
-  24: "㉔", 25: "㉕", 26: "㉖", 27: "㉗", 28: "㉘",
-  29: "㉙", 30: "㉚", 31: "㉛", 32: "㉜", 33: "㉝",
-  34: "㉞", 35: "㉟"
+// js/utils/glyphs.js
+
+// Unified glyph table for days AND years
+// Rule: year glyph = last two digits of year
+// Valid for values 1–31 only
+export const NUMBER_GLYPHS = {
+   1:"①",  2:"②",  3:"③",  4:"④",  5:"⑤",
+   6:"⑥",  7:"⑦",  8:"⑧",  9:"⑨", 10:"⑩",
+  11:"⑪", 12:"⑫", 13:"⑬", 14:"⑭", 15:"⑮",
+  16:"⑯", 17:"⑰", 18:"⑱", 19:"⑲", 20:"⑳",
+  21:"㉑", 22:"㉒", 23:"㉓", 24:"㉔", 25:"㉕",
+  26:"㉖", 27:"㉗", 28:"㉘", 29:"㉙", 30:"㉚",
+  31:"㉛"
 };
 
-// Extend as needed safely up to 99
-for (let i = 1; i <= 20; i++) {
-  YEAR_GLYPHS[i] = String.fromCharCode(0x2460 + i - 1);
+// Day glyph (1–31)
+export function glyphDay(day) {
+  return NUMBER_GLYPHS[day] || "";
 }
 
-// === MONTH GLYPHS (1–12) ===
-// Black circled numbers
-const MONTH_GLYPHS = {
-  1: "❶", 2: "❷", 3: "❸", 4: "❹",
-  5: "❺", 6: "❻", 7: "❼", 8: "❽",
-  9: "❾", 10: "❿", 11: "⓫", 12: "⓬"
-};
-
-// === DAY GLYPHS (1–31) ===
-// White circled numbers
-const DAY_GLYPHS = {};
-for (let i = 1; i <= 31; i++) {
-  DAY_GLYPHS[i] = i <= 20
-    ? String.fromCharCode(0x2460 + i - 1)
-    : String.fromCharCode(0x3251 + i - 21);
-}
-export function y(year) {
-  return YEAR_GLYPHS[year % 100] || "";
+// Month glyph (black circles only)
+export function glyphMonth(month) {
+  return `●${month}`;
 }
 
-export function m(month) {
-  return MONTH_GLYPHS[month] || "";
-}
-
-export function d(day) {
-  return DAY_GLYPHS[day] || "";
+// Year glyph (last two digits → glyph)
+// Example: 2021 → 21 → ㉑
+export function glyphYear(year) {
+  const lastTwo = year % 100;
+  return NUMBER_GLYPHS[lastTwo] || "";
 }
