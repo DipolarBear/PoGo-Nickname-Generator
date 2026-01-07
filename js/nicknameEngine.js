@@ -1,4 +1,4 @@
-import { glyphDay, glyphMonth, glyphYear } from "./glyphs.js";
+import { glyphDay, glyphMonth, glyphYear } from "../glyphs.js";
 
 /*
  Core nickname generator
