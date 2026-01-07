@@ -1,8 +1,8 @@
-// js/utils/glyphs.js
+// glyphs.js
+// Single source of truth for ALL numeric glyphs
 
-// Unified glyph table for days AND years
-// Rule: year glyph = last two digits of year
-// Valid for values 1–31 only
+// White circled numbers (1–31)
+// Used for DAYS and YEARS
 export const NUMBER_GLYPHS = {
    1:"①",  2:"②",  3:"③",  4:"④",  5:"⑤",
    6:"⑥",  7:"⑦",  8:"⑧",  9:"⑨", 10:"⑩",
@@ -15,17 +15,20 @@ export const NUMBER_GLYPHS = {
 
 // Day glyph (1–31)
 export function glyphDay(day) {
-  return NUMBER_GLYPHS[day] || "";
+  return NUMBER_GLYPHS[day] ?? "";
 }
 
-// Month glyph (black circles only)
+// Month glyph — BLACK circles only
 export function glyphMonth(month) {
   return `●${month}`;
 }
 
-// Year glyph (last two digits → glyph)
-// Example: 2021 → 21 → ㉑
+// Year glyph rule:
+// 2001 → ①
+// 2011 → ⑪
+// 2021 → ㉑
+// 2031 → ㉛
 export function glyphYear(year) {
   const lastTwo = year % 100;
-  return NUMBER_GLYPHS[lastTwo] || "";
+  return NUMBER_GLYPHS[lastTwo] ?? "";
 }
