@@ -16,11 +16,18 @@ Object.keys(COUNTRIES).forEach(code => {
 });
 
 // Toggle blocks
-el("isPG").addEventListener("change", () => {
-  el("localityBlock").style.display = el("isPG").checked ? "none" : "block";
-  el("pgBlock").style.display = el("isPG").checked ? "block" : "none";
+el("friendType").addEventListener("change", () => {
+  const isPG = el("friendType").value === "pg";
+  el("localityBlock").style.display = isPG ? "none" : "block";
+  el("pgBlock").style.display = isPG ? "block" : "none";
+
+  if (isPG) {
+    el("country").dispatchEvent(new Event("change"));
+  }
+
   update();
 });
+
 
 // Country → state logic
 el("country").addEventListener("change", () => {
@@ -66,7 +73,7 @@ function update() {
   }
 
   const input = {
-    isPokeGenie: el("isPG").checked,
+   isPokeGenie: el("friendType").value === "pg",
     locality: locality || null,
     country: el("country").value || null,
     state: el("stateLabel").style.display === "inline" ? el("state").value : null,
