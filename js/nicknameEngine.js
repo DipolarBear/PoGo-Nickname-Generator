@@ -1,151 +1,107 @@
 import { glyphDay, glyphMonth, glyphYear } from "./glyphs.js";
 
-/* =========================
-   Glyph Maps
-========================= */
-
-// Year: last two digits → CJK circled
-export function glyphYear(y) {
-  return String.fromCharCode(0x3250 + (y % 100));
-}
-
-// Month: black circled
-const MONTH = {
-  1:"❶",2:"❷",3:"❸",4:"❹",5:"❺",6:"❻",
-  7:"❼",8:"❽",9:"❾",10:"❿",11:"⓫",12:"⓬"
-};
-export function glyphMonth(m) {
-  return MONTH[m];
-}
-
-// Day: white circled
-export function glyphDay(d) {
-  if (d <= 20) return String.fromCharCode(0x2460 + d - 1);
-  return String.fromCharCode(0x3250 + d);
-}
-
-/* =========================
-   Helpers
-========================= */
-
-function sameYear(a, b) {
-  return a && b && a.y === b.y;
-}
-
-function friendDateGlyph(fd) {
-  return glyphYear(fd.y) + glyphMonth(fd.m) + glyphDay(fd.d);
-}
-
-function monthOnlyGlyph(date, includeYear) {
-  return (includeYear ? glyphYear(date.y) : "") + glyphMonth(date.m);
-}
-
-/* =========================
-   Core Generator
-========================= */
+/*
+ Core nickname generator
+ All rules enforced here
+*/
 
 export function generateNickname(input) {
   const {
     isPokeGenie,
-    locality,
-    country,
-    state,
-    friendDate,
-    bestFriendDate,
-    foreverFriendDate,
-    status = ""
+    locality,          // string (local) OR ignored if PG
+    country,           // ISO A-2
+    state,             // optional (PG only)
+    friendDate,        // { y, m, d }
+    bestDate,          // { y, m, d } | null
+    foreverDate,       // { y, m } | null
+    status              // "" | "X" | "Y" | "Z" | "XY" etc
   } = input;
 
-  let out = "";
+  // ---------- helpers ----------
+  const fd = buildFullDate(friendDate);
+  const bd = bestDate ? buildFullDate(bestDate) : "";
+  const bm = bestDate ? buildMonthDate(bestDate) : "";
+  const fm = foreverDate ? buildMonthDate(foreverDate) : "";
 
-  /* =========================
-     PREFIX
-  ========================= */
+  // ---------- LOCAL FRIENDS ----------
+  if (!isPokeGenie) {
+    let name = locality;
 
-  if (isPokeGenie) {
-    out += "PG";
-    out += friendDateGlyph(friendDate);
-    if (country) out += country;
-    if (state) out += state;
-  } else {
-    out += locality;
-    out += friendDateGlyph(friendDate);
-  }
+    // REGULAR
+    if (!bestDate) {
+      return truncate(`${name}${fd}${status}`, 12);
+    }
 
-  /* =========================
-     BEST FRIEND
-  ========================= */
+    // BEST
+    if (!foreverDate) {
+      let core = `${name}${fd}-${bd}`;
 
-  if (bestFriendDate && !foreverFriendDate) {
-    const includeYear = !sameYear(friendDate, bestFriendDate);
-    out += "-";
-    out +=
-      (includeYear ? glyphYear(bestFriendDate.y) : "") +
-      glyphMonth(bestFriendDate.m) +
-      glyphDay(bestFriendDate.d);
+      // If two status letters overflow, remove dash
+      if ((core + status).length > 12 && status.length === 2) {
+        core = `${name}${fd}${bd}`;
+      }
 
-    out += status;
-    return trimTo12(out, isPokeGenie);
-  }
+      return truncate(`${core}${status}`, 12);
+    }
 
-  /* =========================
-     FOREVER FRIEND
-  ========================= */
-
-  if (foreverFriendDate) {
-    const f = friendDate;
-    const b = bestFriendDate;
-    const ff = foreverFriendDate;
-
-    const sameFB = sameYear(f, b);
-    const sameBF = sameYear(b, ff);
-
-    // Local compact form: ONLY 4-letter locality + all years different
-    const useCompact =
-      !isPokeGenie &&
-      locality.length === 4 &&
-      f.y !== b.y &&
-      b.y !== ff.y;
-
-    if (!useCompact) out += "-";
-
-    // Best Friend (month only)
-    out += monthOnlyGlyph(
-      b,
-      !sameFB
+    // FOREVER (no status allowed)
+    return truncate(
+      `${name}${fd}-${bm}-${fm}`,
+      12
     );
-
-    // Forever Friend (month only)
-    out +=
-      (useCompact ? "" : "-") +
-      monthOnlyGlyph(
-        ff,
-        !sameBF
-      );
-
-    return trimTo12(out, isPokeGenie);
   }
 
-  /* =========================
-     REGULAR FRIEND
-  ========================= */
+  // ---------- POKEGENIE FRIENDS ----------
+  const pg = "PG";
+  const loc = state ? `${country}${state}` : country;
 
-  out += status;
-  return trimTo12(out, isPokeGenie);
+  // REGULAR
+  if (!bestDate) {
+    return truncate(`${pg}${fd}${loc}`, 12);
+  }
+
+  // BEST FRIEND
+  if (!foreverDate) {
+    let core = `${pg}${fd}${loc}-${bd}${status}`;
+
+    // If overflow → drop state
+    if (core.length > 12 && state) {
+      core = `${pg}${fd}${country}-${bd}${status}`;
+    }
+
+    return truncate(core, 12);
+  }
+
+  // FOREVER FRIEND (no status)
+  // State must be removed
+  return truncate(
+    `${pg}${fd}${country}-${bm}-${fm}`,
+    12
+  );
 }
 
-/* =========================
-   12-Character Enforcement
-========================= */
+// ---------- date builders ----------
 
-function trimTo12(str, isPokeGenie) {
-  if (str.length <= 12) return str;
+function buildFullDate(d) {
+  return (
+    glyphYear(d.y) +
+    glyphMonth(d.m) +
+    glyphDay(d.d)
+  );
+}
 
-  // PG Best Friends: drop state first
-  if (isPokeGenie) {
-    const noState = str.replace(/[A-Z]{2}$/, "");
-    if (noState.length <= 12) return noState;
-  }
+function buildMonthDate(d) {
+  let out = "";
 
-  return str.slice(0, 12);
+  // year only if needed (handled upstream)
+  out += glyphYear(d.y);
+  out += glyphMonth(d.m);
+
+  return out;
+}
+
+// ---------- util ----------
+
+function truncate(str, max) {
+  return str.length <= max ? str : str.slice(0, max);
 }
