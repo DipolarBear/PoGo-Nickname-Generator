@@ -1,88 +1,119 @@
 import { glyphDay, glyphMonth, glyphYear } from "../glyphs.js";
 
 /*
- Core nickname generator
- All rules enforced here
+  Expected input shape (from UI):
+
+  {
+    isPokeGenie: boolean,
+
+    locality: string,          // Local only
+    country: string,           // PG only (ISO A-2)
+    state: string | "",        // PG only
+
+    friendDate: { y, m, d },   // always required
+
+    bestDate: { y, m, d } | null,
+    foreverDate: { y, m } | null,
+
+    status: "" | "X" | "Y" | "Z" | "XY"
+  }
 */
 
 export function generateNickname(input) {
   const {
     isPokeGenie,
-    locality,          // string (local) OR ignored if PG
-    country,           // ISO A-2
-    state,             // optional (PG only)
-    friendDate,        // { y, m, d }
-    bestDate,          // { y, m, d } | null
-    foreverDate,       // { y, m } | null
-    status              // "" | "X" | "Y" | "Z" | "XY" etc
+    locality = "",
+    country = "",
+    state = "",
+    friendDate,
+    bestDate,
+    foreverDate,
+    status = ""
   } = input;
 
   // ---------- helpers ----------
-  const fd = buildFullDate(friendDate);
-  const bd = bestDate ? buildFullDate(bestDate) : "";
-  const bm = bestDate ? buildMonthDate(bestDate) : "";
-  const fm = foreverDate ? buildMonthDate(foreverDate) : "";
+  const hasBest =
+    bestDate &&
+    Number.isInteger(bestDate.y) &&
+    Number.isInteger(bestDate.m) &&
+    Number.isInteger(bestDate.d);
 
-  // ---------- LOCAL FRIENDS ----------
+  const hasForever =
+    foreverDate &&
+    Number.isInteger(foreverDate.y) &&
+    Number.isInteger(foreverDate.m);
+
+  const friendStr = fullDate(friendDate);
+  const bestFull = hasBest ? fullDate(bestDate) : "";
+  const bestMonth = hasBest ? monthDate(bestDate) : "";
+  const foreverMonth = hasForever ? monthDate(foreverDate) : "";
+
+  /* =========================
+     LOCAL FRIENDS
+     ========================= */
+
   if (!isPokeGenie) {
-    let name = locality;
-
     // REGULAR
-    if (!bestDate) {
-      return truncate(`${name}${fd}${status}`, 12);
+    if (!hasBest) {
+      return truncate(`${locality}${friendStr}${status}`, 12);
     }
 
     // BEST
-    if (!foreverDate) {
-      let core = `${name}${fd}-${bd}`;
+    if (!hasForever) {
+      let base = `${locality}${friendStr}-${bestFull}`;
+      let withStatus = `${base}${status}`;
 
-      // If two status letters overflow, remove dash
-      if ((core + status).length > 12 && status.length === 2) {
-        core = `${name}${fd}${bd}`;
+      // Priority rule: remove dash if needed to fit 2 status letters
+      if (withStatus.length > 12 && status.length === 2) {
+        withStatus = `${locality}${friendStr}${bestFull}${status}`;
       }
 
-      return truncate(`${core}${status}`, 12);
+      return truncate(withStatus, 12);
     }
 
     // FOREVER (no status allowed)
     return truncate(
-      `${name}${fd}-${bm}-${fm}`,
+      `${locality}${friendStr}-${bestMonth}-${foreverMonth}`,
       12
     );
   }
 
-  // ---------- POKEGENIE FRIENDS ----------
-  const pg = "PG";
-  const loc = state ? `${country}${state}` : country;
+  /* =========================
+     POKEGENIE FRIENDS
+     ========================= */
+
+  const pgPrefix = "PG";
+  const locWithState = state ? `${country}${state}` : country;
 
   // REGULAR
-  if (!bestDate) {
-    return truncate(`${pg}${fd}${loc}`, 12);
+  if (!hasBest) {
+    return truncate(`${pgPrefix}${friendStr}${locWithState}`, 12);
   }
 
-  // BEST FRIEND
-  if (!foreverDate) {
-    let core = `${pg}${fd}${loc}-${bd}${status}`;
+  // BEST
+  if (!hasForever) {
+    let base = `${pgPrefix}${friendStr}${locWithState}-${bestFull}${status}`;
 
-    // If overflow → drop state
-    if (core.length > 12 && state) {
-      core = `${pg}${fd}${country}-${bd}${status}`;
+    // Overflow rule: drop state if needed
+    if (base.length > 12 && state) {
+      base = `${pgPrefix}${friendStr}${country}-${bestFull}${status}`;
     }
 
-    return truncate(core, 12);
+    return truncate(base, 12);
   }
 
-  // FOREVER FRIEND (no status)
-  // State must be removed
+  // FOREVER (no status, drop state always)
   return truncate(
-    `${pg}${fd}${country}-${bm}-${fm}`,
+    `${pgPrefix}${friendStr}${country}-${bestMonth}-${foreverMonth}`,
     12
   );
 }
 
-// ---------- date builders ----------
+/* =========================
+   DATE BUILDERS
+   ========================= */
 
-function buildFullDate(d) {
+function fullDate(d) {
   return (
     glyphYear(d.y) +
     glyphMonth(d.m) +
@@ -90,17 +121,13 @@ function buildFullDate(d) {
   );
 }
 
-function buildMonthDate(d) {
-  let out = "";
-
-  // year only if needed (handled upstream)
-  out += glyphYear(d.y);
-  out += glyphMonth(d.m);
-
-  return out;
+function monthDate(d) {
+  return glyphYear(d.y) + glyphMonth(d.m);
 }
 
-// ---------- util ----------
+/* =========================
+   UTIL
+   ========================= */
 
 function truncate(str, max) {
   return str.length <= max ? str : str.slice(0, max);
