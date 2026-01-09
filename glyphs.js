@@ -1,9 +1,12 @@
 // glyphs.js
-// Single source of truth for ALL numeric glyphs
+// Single source of truth for all numeric glyphs used in nicknames
 
-// White circled numbers (1–31)
-// Used for DAYS and YEARS
-export const NUMBER_GLYPHS = {
+/* =========================
+   WHITE CIRCLED NUMBERS
+   Used for DAYS and YEARS
+   ========================= */
+
+export const WHITE_CIRCLED = {
    1:"①",  2:"②",  3:"③",  4:"④",  5:"⑤",
    6:"⑥",  7:"⑦",  8:"⑧",  9:"⑨", 10:"⑩",
   11:"⑪", 12:"⑫", 13:"⑬", 14:"⑭", 15:"⑮",
@@ -13,22 +16,40 @@ export const NUMBER_GLYPHS = {
   31:"㉛"
 };
 
-// Day glyph (1–31)
+/* =========================
+   BLACK (FILLED) CIRCLED NUMBERS
+   Used for MONTHS ONLY
+   =========================
+   1–10  : U+2776 – U+277F
+   11–12 : U+24EB – U+24EC
+*/
+
+export const BLACK_CIRCLED_MONTHS = {
+   1:"❶",  2:"❷",  3:"❸",  4:"❹",  5:"❺",
+   6:"❻",  7:"❼",  8:"❽",  9:"❾", 10:"❿",
+  11:"⓫", 12:"⓬"
+};
+
+/* =========================
+   PUBLIC API
+   ========================= */
+
+// Day: 1–31
 export function glyphDay(day) {
-  return NUMBER_GLYPHS[day] ?? "";
+  return WHITE_CIRCLED[day] ?? "";
 }
 
-// Month glyph — BLACK circles only
+// Month: 1–12 (black circled)
 export function glyphMonth(month) {
-  return `●${month}`;
+  return BLACK_CIRCLED_MONTHS[month] ?? "";
 }
 
-// Year glyph rule:
+// Year rule:
 // 2001 → ①
 // 2011 → ⑪
 // 2021 → ㉑
 // 2031 → ㉛
 export function glyphYear(year) {
   const lastTwo = year % 100;
-  return NUMBER_GLYPHS[lastTwo] ?? "";
+  return WHITE_CIRCLED[lastTwo] ?? "";
 }
