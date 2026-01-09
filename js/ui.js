@@ -72,16 +72,19 @@ function update() {
     return;
   }
 
-  const input = {
-   isPokeGenie: el("friendType").value === "pg",
-    locality: locality || null,
-    country: el("country").value || null,
-    state: el("stateLabel").style.display === "inline" ? el("state").value : null,
-    friendDate: parseDate(el("friendDate").value),
-    bestFriendDate: parseDate(el("bestDate").value),
-    foreverFriendDate: parseMonth(el("foreverDate").value),
-    status: el("status").value
-  };
+ const input = {
+  isPokeGenie: el("friendType").value === "pg",
+  locality: locality || null,
+  country: el("country").value || null,
+  state: el("stateLabel").style.display === "inline" ? el("state").value : null,
+
+  friendDate: parseDate(el("friendDate").value),
+  bestDate: parseDate(el("bestDate").value),
+  foreverDate: parseMonth(el("foreverDate").value),
+
+  status: el("status").value.trim().toUpperCase()
+};
+
 
   if (!input.friendDate) {
     el("output").textContent = "";
