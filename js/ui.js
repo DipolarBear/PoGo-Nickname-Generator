@@ -88,6 +88,8 @@ function update() {
     el("count").textContent = "";
     return;
   }
+  //Temporary
+console.log("INPUT TO ENGINE:", input);
 
   const nick = generateNickname(input);
   el("output").textContent = nick;
