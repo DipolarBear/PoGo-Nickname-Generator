@@ -1,22 +1,8 @@
 import { glyphDay, glyphMonth, glyphYear } from "../glyphs.js";
 
 /*
-  Expected input shape (from UI):
-
-  {
-    isPokeGenie: boolean,
-
-    locality: string,          // Local only
-    country: string,           // PG only (ISO A-2)
-    state: string | "",        // PG only
-
-    friendDate: { y, m, d },   // always required
-
-    bestDate: { y, m, d } | null,
-    foreverDate: { y, m } | null,
-
-    status: "" | "X" | "Y" | "Z" | "XY"
-  }
+  Deterministic nickname engine
+  Fully aligned with decision tree
 */
 
 export function generateNickname(input) {
@@ -31,104 +17,197 @@ export function generateNickname(input) {
     status = ""
   } = input;
 
-  // ---------- helpers ----------
-  const hasBest =
-    bestDate &&
-    Number.isInteger(bestDate.y) &&
-    Number.isInteger(bestDate.m) &&
-    Number.isInteger(bestDate.d);
+  if (!friendDate) return "";
 
-  const hasForever =
-    foreverDate &&
-    Number.isInteger(foreverDate.y) &&
-    Number.isInteger(foreverDate.m);
+  const hasBest = isValidDate(bestDate);
+  const hasForever = isValidMonth(foreverDate);
 
-  const friendStr = fullDate(friendDate);
-  const bestFull = hasBest ? fullDate(bestDate) : "";
-  const bestMonth = hasBest ? monthDate(bestDate) : "";
-  const foreverMonth = hasForever ? monthDate(foreverDate) : "";
+  const cleanStatus = hasForever ? "" : status; // forbid on forever
 
-  /* =========================
-     LOCAL FRIENDS
-     ========================= */
+  return isPokeGenie
+    ? buildPG({
+        country,
+        state,
+        friendDate,
+        bestDate,
+        foreverDate,
+        hasBest,
+        hasForever,
+        status: cleanStatus
+      })
+    : buildLocal({
+        locality,
+        friendDate,
+        bestDate,
+        foreverDate,
+        hasBest,
+        hasForever,
+        status: cleanStatus
+      });
+}
 
-  if (!isPokeGenie) {
-    // REGULAR
-    if (!hasBest) {
-      return truncate(`${locality}${friendStr}${status}`, 12);
-    }
+/* =========================
+   LOCAL
+   ========================= */
 
-    // BEST
-    if (!hasForever) {
-      let base = `${locality}${friendStr}-${bestFull}`;
-      let withStatus = `${base}${status}`;
+function buildLocal(ctx) {
+  const {
+    locality,
+    friendDate,
+    bestDate,
+    foreverDate,
+    hasBest,
+    hasForever,
+    status
+  } = ctx;
 
-      // Priority rule: remove dash if needed to fit 2 status letters
-      if (withStatus.length > 12 && status.length === 2) {
-        withStatus = `${locality}${friendStr}${bestFull}${status}`;
-      }
-
-      return truncate(withStatus, 12);
-    }
-
-    // FOREVER (no status allowed)
-    return truncate(
-      `${locality}${friendStr}-${bestMonth}-${foreverMonth}`,
-      12
-    );
-  }
-
-  /* =========================
-     POKEGENIE FRIENDS
-     ========================= */
-
-  const pgPrefix = "PG";
-  const locWithState = state ? `${country}${state}` : country;
+  const friendStr = fullDate(friendDate, true);
 
   // REGULAR
   if (!hasBest) {
-    return truncate(`${pgPrefix}${friendStr}${locWithState}`, 12);
+    return finalize(`${locality}${friendStr}${status}`);
   }
 
   // BEST
   if (!hasForever) {
-    let base = `${pgPrefix}${friendStr}${locWithState}-${bestFull}${status}`;
+    const includeYear = bestDate.y !== friendDate.y;
+    const bestStr = fullDate(bestDate, includeYear);
 
-    // Overflow rule: drop state if needed
-    if (base.length > 12 && state) {
-      base = `${pgPrefix}${friendStr}${country}-${bestFull}${status}`;
+    let base = `${locality}${friendStr}-${bestStr}`;
+    let result = `${base}${status}`;
+
+    // 🔧 override: dash removal (STRICT CONDITIONS)
+    if (
+      result.length > 12 &&
+      locality.length === 4 &&
+      includeYear &&
+      status.length === 2
+    ) {
+      result = `${locality}${friendStr}${bestStr}${status}`;
     }
 
-    return truncate(base, 12);
+    return finalize(result);
   }
 
-  // FOREVER (no status, drop state always)
-  return truncate(
-    `${pgPrefix}${friendStr}${country}-${bestMonth}-${foreverMonth}`,
-    12
+  // FOREVER
+
+  const bfYear = bestDate.y !== friendDate.y;
+  const ffYear = foreverDate.y !== bestDate.y;
+
+  const bfPart = monthDate(bestDate, bfYear);
+  const ffPart = monthDate(foreverDate, ffYear);
+
+  const allDifferent =
+    friendDate.y !== bestDate.y &&
+    bestDate.y !== foreverDate.y &&
+    friendDate.y !== foreverDate.y;
+
+  // COMPACT
+  if (locality.length === 4 && allDifferent) {
+    return finalize(
+      `${locality}${friendStr}-${bfPart}${ffPart}`
+    );
+  }
+
+  // DEFAULT
+  return finalize(
+    `${locality}${friendStr}-${bfPart}-${ffPart}`
   );
 }
 
 /* =========================
-   DATE BUILDERS
+   POKÉGENIE
    ========================= */
 
-function fullDate(d) {
+function buildPG(ctx) {
+  let {
+    country,
+    state,
+    friendDate,
+    bestDate,
+    foreverDate,
+    hasBest,
+    hasForever,
+    status
+  } = ctx;
+
+  // enforce state rule
+  if (!["US", "CA", "MX", "AU"].includes(country)) {
+    state = "";
+  }
+
+  const friendStr = fullDate(friendDate, true);
+
+  // REGULAR
+  if (!hasBest) {
+    let result = `PG${friendStr}${country}${state}${status}`;
+
+    if (result.length > 12 && state) {
+      result = `PG${friendStr}${country}${status}`;
+    }
+
+    return finalize(result);
+  }
+
+  // BEST
+  if (!hasForever) {
+    const includeYear = bestDate.y !== friendDate.y;
+    const bestStr = fullDate(bestDate, includeYear);
+
+    let result = `PG${friendStr}${country}${state}${bestStr}${status}`;
+
+    // 🔧 override: remove state ONLY
+    if (result.length > 12 && state) {
+      result = `PG${friendStr}${country}${bestStr}${status}`;
+    }
+
+    return finalize(result);
+  }
+
+  // FOREVER
+
+  const bfYear = bestDate.y !== friendDate.y;
+  const ffYear = foreverDate.y !== bestDate.y;
+
+  const bfPart = monthDate(bestDate, bfYear);
+  const ffPart = monthDate(foreverDate, ffYear);
+
+  return finalize(
+    `PG${friendStr}${country}${bfPart}-${ffPart}`
+  );
+}
+
+/* =========================
+   DATE HELPERS
+   ========================= */
+
+function fullDate(d, includeYear) {
   return (
-    glyphYear(d.y) +
+    (includeYear ? glyphYear(d.y) : "") +
     glyphMonth(d.m) +
     glyphDay(d.d)
   );
 }
 
-function monthDate(d) {
-  return glyphYear(d.y) + glyphMonth(d.m);
+function monthDate(d, includeYear) {
+  return (
+    (includeYear ? glyphYear(d.y) : "") +
+    glyphMonth(d.m)
+  );
 }
 
 /* =========================
-   UTIL
+   VALIDATION
    ========================= */
 
-function truncate(str, max) {
-  return str.length <= max ? str : str.slice(0, max);
+function finalize(str) {
+  return str.length <= 12 ? str : "❌";
+}
+
+function isValidDate(d) {
+  return d && d.y && d.m && d.d;
+}
+
+function isValidMonth(d) {
+  return d && d.y && d.m;
 }
