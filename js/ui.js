@@ -5,6 +5,28 @@ import { isBadLocality, countryHasStates } from "./validate.js";
 
 const el = id => document.getElementById(id);
 
+function initDefaults() {
+  const activeType = document.querySelector("#friendTypeButtons .active");
+  const activeStatus = document.querySelector("#statusButtons .active");
+
+  if (activeType) {
+    selectedType = activeType.dataset.type;
+  }
+
+  if (activeStatus) {
+    selectedStatus = activeStatus.dataset.status;
+  }
+
+  // Apply correct UI visibility immediately
+  const isPG = selectedType === "pg";
+  el("localityBlock").style.display = isPG ? "none" : "block";
+  el("pgBlock").style.display = isPG ? "block" : "none";
+
+  if (isPG) {
+    el("country").dispatchEvent(new Event("change"));
+  }
+}
+
 /* =========================
    STATE
    ========================= */
@@ -160,7 +182,7 @@ function update() {
     return;
   }
 
-  const nick = generateNickname(input);
+ const nick = generateNickname(input) || "";
 
   el("output").textContent = nick;
   el("count").textContent = ` (${nick.length}/12)`;
@@ -168,3 +190,6 @@ function update() {
   // Auto copy
   copyNickname(nick);
 }
+
+initDefaults();
+update();
