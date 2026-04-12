@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PoGo Nickname Generator</title>
+
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -11,145 +12,129 @@
       max-width: 480px;
       margin: auto;
     }
+
     h1 { font-size: 1.4em; }
-    label { display: block; margin-top: 12px; font-weight: 600; }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+    }
+
     input, select {
       width: 100%;
       padding: 8px;
       font-size: 1em;
       margin-top: 4px;
     }
-    .inline {
+
+    .button-group {
       display: flex;
-      gap: 12px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
     }
-    .inline > div {
-      flex: 1;
-    }
-    .output {
-      margin-top: 20px;
-      padding: 12px;
+
+    .button-group button {
+      padding: 6px 10px;
       border: 1px solid #ccc;
+      background: #f5f5f5;
+      cursor: pointer;
+    }
+
+    .button-group button.active {
+      background: #007aff;
+      color: white;
+      border-color: #007aff;
+    }
+
+    #output {
+      display: inline-block;
+      margin-top: 10px;
       font-size: 1.2em;
-      text-align: center;
       user-select: all;
     }
-    .hint {
-      font-size: 0.85em;
-      color: #555;
+
+    #copyBtn {
+      margin-top: 10px;
+      padding: 8px;
+      width: 100%;
+      cursor: pointer;
     }
-    .button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.button-group button {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  background: #f5f5f5;
-  cursor: pointer;
-}
-
-.button-group button.active {
-  background: #007aff;
-  color: white;
-  border-color: #007aff;
-}
   </style>
 </head>
+
 <body>
-  <h1>PoGo Nickname Generator</h1>
 
-  <!-- Friend Type -->
-  <label>
-  Friend Type:
-  <div>
-  <label>Friend Type:</label>
-  <div id="friendTypeButtons" class="button-group">
-    <button data-type="local">Local</button>
-    <button data-type="pg">PokeGenie</button>
-  </div>
-</div>
-    <option value="local">Local</option>
-    <option value="pg">PokeGenie</option>
-  </select>
-</label>
+<h1>PoGo Nickname Generator</h1>
 
-
-  <hr>
-
-  <!-- Locality (Local friends only) -->
-  <div id="localityBlock">
-    <label>
-      Locality:
-      <input id="locality" maxlength="4" placeholder="Dav">
-    </label>
-  </div>
-
-  <!-- Country / State (PG only) -->
-  <div id="pgBlock" style="display:none">
-    <label>
-      Country:
-      <select id="country"></select>
-    </label>
-
-    <label id="stateLabel" style="display:none">
-      State / Province:
-      <select id="state"></select>
-    </label>
-  </div>
-
-  <hr>
-
-  <!-- Dates -->
-  <label>
-    Friend Date:
-    <input type="date" id="friendDate">
-  </label>
-
-  <label>
-    Best Friend Date:
-    <input type="date" id="bestDate">
-  </label>
-
-  <label>
-    Forever Friend Date:
-    <input type="month" id="foreverDate">
-  </label>
-
-  <hr>
-
-  <!-- Status -->
-<div>
-  <label>Status:</label>
-  <div id="statusButtons" class="button-group">
-    <button data-status="">None</button>
-    <button data-status="X">X</button>
-    <button data-status="Y">Y</button>
-    <button data-status="Z">Z</button>
-    <button data-status="W">W</button>
-    <button data-status="XY">XY</button>
-  </div>
+<!-- Friend Type -->
+<label>Friend Type:</label>
+<div id="friendTypeButtons" class="button-group">
+  <button data-type="local" class="active">Local</button>
+  <button data-type="pg">PokeGenie</button>
 </div>
 
-  <hr>
+<hr>
 
-  <!-- Output -->
-  <div>
-    <strong>Nickname:</strong>
-    <span id="output"></span>
-    <span id="count"></span>
-  </div>
+<!-- Local -->
+<div id="localityBlock">
+  <label>
+    Locality:
+    <input id="locality" maxlength="4" placeholder="Dav">
+  </label>
+</div>
+
+<!-- PG -->
+<div id="pgBlock" style="display:none">
+  <label>
+    Country:
+    <select id="country"></select>
+  </label>
+
+  <label id="stateLabel" style="display:none">
+    State / Province:
+    <select id="state"></select>
+  </label>
+</div>
+
+<hr>
+
+<!-- Dates -->
+<label>Friend Date:</label>
+<input type="date" id="friendDate">
+
+<label>Best Friend Date:</label>
+<input type="date" id="bestDate">
+
+<label>Forever Friend Date:</label>
+<input type="month" id="foreverDate">
+
+<hr>
+
+<!-- Status -->
+<label>Status:</label>
+<div id="statusButtons" class="button-group">
+  <button data-status="" class="active">None</button>
+  <button data-status="X">X</button>
+  <button data-status="Y">Y</button>
+  <button data-status="Z">Z</button>
+  <button data-status="W">W</button>
+  <button data-status="XY">XY</button>
+</div>
+
+<hr>
+
+<!-- Output -->
 <div>
-  <strong>Nickname:</strong>
+  <strong>Nickname:</strong><br>
   <span id="output"></span>
   <span id="count"></span>
 </div>
 
 <button id="copyBtn">Copy</button>
-  
-  <script type="module" src="./js/ui.js"></script>
+
+<script type="module" src="./js/ui.js"></script>
+
 </body>
 </html>
