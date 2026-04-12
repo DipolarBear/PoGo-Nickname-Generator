@@ -1,3 +1,42 @@
+let selectedType = "local";
+let selectedStatus = "";
+
+document.querySelectorAll("#friendTypeButtons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedType = btn.dataset.type;
+
+    document
+      .querySelectorAll("#friendTypeButtons button")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    const isPG = selectedType === "pg";
+    el("localityBlock").style.display = isPG ? "none" : "block";
+    el("pgBlock").style.display = isPG ? "block" : "none";
+
+    if (isPG) {
+      el("country").dispatchEvent(new Event("change"));
+    }
+
+    update();
+  });
+});
+
+document.querySelectorAll("#statusButtons button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedStatus = btn.dataset.status;
+
+    document
+      .querySelectorAll("#statusButtons button")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    update();
+  });
+});
+
 console.log("UI loaded");
 
 import { generateNickname } from "./nicknameEngine.js";
@@ -73,7 +112,7 @@ function update() {
   }
 
  const input = {
-  isPokeGenie: el("friendType").value === "pg",
+  isPokeGenie: selectedType === "pg",
   locality: locality || null,
   country: el("country").value || null,
   state: el("stateLabel").style.display === "inline" ? el("state").value : null,
@@ -82,7 +121,7 @@ function update() {
   bestDate: parseDate(el("bestDate").value),
   foreverDate: parseMonth(el("foreverDate").value),
 
-  status: el("status").value.trim().toUpperCase()
+  status: selectedStatus
 };
 
 
@@ -92,7 +131,19 @@ function update() {
     return;
   }
 
-  const nick = generateNickname(input);
-  el("output").textContent = nick;
-  el("count").textContent = ` (${nick.length}/12)`;
+ const nick = generateNickname(input);
+el("output").textContent = nick;
+el("count").textContent = ` (${nick.length}/12)`;
+
+// auto copy
+copyNickname(nick);
 }
+
+function copyNickname(text) {
+  if (!text || text === "❌") return;
+  navigator.clipboard.writeText(text);
+}
+
+el("copyBtn").addEventListener("click", () => {
+  copyNickname(el("output").textContent);
+});
