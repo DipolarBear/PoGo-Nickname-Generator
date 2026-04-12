@@ -1,12 +1,39 @@
+import { generateNickname } from "./nicknameEngine.js";
+import { COUNTRIES } from "./data/countries.js";
+import { STATES } from "./data/states.js";
+import { isBadLocality, countryHasStates } from "./validate.js";
+
+const el = id => document.getElementById(id);
+
+/* =========================
+   STATE
+   ========================= */
+
 let selectedType = "local";
 let selectedStatus = "";
 
+/* =========================
+   INIT
+   ========================= */
+
+// Populate countries
+Object.keys(COUNTRIES).forEach(code => {
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = `${code} — ${COUNTRIES[code].name}`;
+  el("country").appendChild(opt);
+});
+
+/* =========================
+   BUTTON LOGIC
+   ========================= */
+
+// Friend Type
 document.querySelectorAll("#friendTypeButtons button").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedType = btn.dataset.type;
 
-    document
-      .querySelectorAll("#friendTypeButtons button")
+    document.querySelectorAll("#friendTypeButtons button")
       .forEach(b => b.classList.remove("active"));
 
     btn.classList.add("active");
@@ -23,12 +50,12 @@ document.querySelectorAll("#friendTypeButtons button").forEach(btn => {
   });
 });
 
+// Status
 document.querySelectorAll("#statusButtons button").forEach(btn => {
   btn.addEventListener("click", () => {
     selectedStatus = btn.dataset.status;
 
-    document
-      .querySelectorAll("#statusButtons button")
+    document.querySelectorAll("#statusButtons button")
       .forEach(b => b.classList.remove("active"));
 
     btn.classList.add("active");
@@ -37,43 +64,17 @@ document.querySelectorAll("#statusButtons button").forEach(btn => {
   });
 });
 
-console.log("UI loaded");
+/* =========================
+   COUNTRY → STATE
+   ========================= */
 
-import { generateNickname } from "./nicknameEngine.js";
-import { COUNTRIES } from "./data/countries.js";
-import { STATES } from "./data/states.js";
-import { isBadLocality, countryHasStates } from "./validate.js";
-
-const el = id => document.getElementById(id);
-
-// Populate country dropdown
-Object.keys(COUNTRIES).forEach(code => {
-  const opt = document.createElement("option");
-  opt.value = code;
-  opt.textContent = `${code} — ${COUNTRIES[code].name}`;
-  el("country").appendChild(opt);
-});
-
-// Toggle blocks
-el("friendType").addEventListener("change", () => {
-  const isPG = el("friendType").value === "pg";
-  el("localityBlock").style.display = isPG ? "none" : "block";
-  el("pgBlock").style.display = isPG ? "block" : "none";
-
-  if (isPG) {
-    el("country").dispatchEvent(new Event("change"));
-  }
-
-  update();
-});
-
-
-// Country → state logic
 el("country").addEventListener("change", () => {
   const c = el("country").value;
+
   if (countryHasStates(c)) {
-    el("stateLabel").style.display = "inline";
+    el("stateLabel").style.display = "block";
     el("state").innerHTML = "";
+
     STATES[c].forEach(s => {
       const opt = document.createElement("option");
       opt.value = s;
@@ -83,13 +84,21 @@ el("country").addEventListener("change", () => {
   } else {
     el("stateLabel").style.display = "none";
   }
+
   update();
 });
 
-// Main update
+/* =========================
+   INPUT LISTENERS
+   ========================= */
+
 document.querySelectorAll("input, select").forEach(x =>
   x.addEventListener("change", update)
 );
+
+/* =========================
+   PARSERS
+   ========================= */
 
 function parseDate(d) {
   if (!d) return null;
@@ -103,41 +112,9 @@ function parseMonth(m) {
   return { y: +y, m: +mo };
 }
 
-function update() {
-  const locality = el("locality").value;
-
-  if (isBadLocality(locality)) {
-    el("output").textContent = "⚠ locality cannot be PG";
-    return;
-  }
-
- const input = {
-  isPokeGenie: selectedType === "pg",
-  locality: locality || null,
-  country: el("country").value || null,
-  state: el("stateLabel").style.display === "inline" ? el("state").value : null,
-
-  friendDate: parseDate(el("friendDate").value),
-  bestDate: parseDate(el("bestDate").value),
-  foreverDate: parseMonth(el("foreverDate").value),
-
-  status: selectedStatus
-};
-
-
-  if (!input.friendDate) {
-    el("output").textContent = "";
-    el("count").textContent = "";
-    return;
-  }
-
- const nick = generateNickname(input);
-el("output").textContent = nick;
-el("count").textContent = ` (${nick.length}/12)`;
-
-// auto copy
-copyNickname(nick);
-}
+/* =========================
+   COPY
+   ========================= */
 
 function copyNickname(text) {
   if (!text || text === "❌") return;
@@ -147,3 +124,47 @@ function copyNickname(text) {
 el("copyBtn").addEventListener("click", () => {
   copyNickname(el("output").textContent);
 });
+
+/* =========================
+   MAIN UPDATE
+   ========================= */
+
+function update() {
+  const locality = el("locality").value;
+
+  if (isBadLocality(locality)) {
+    el("output").textContent = "⚠ locality cannot be PG";
+    el("count").textContent = "";
+    return;
+  }
+
+  const input = {
+    isPokeGenie: selectedType === "pg",
+    locality: locality || null,
+    country: el("country").value || null,
+    state:
+      el("stateLabel").style.display !== "none"
+        ? el("state").value
+        : null,
+
+    friendDate: parseDate(el("friendDate").value),
+    bestDate: parseDate(el("bestDate").value),
+    foreverDate: parseMonth(el("foreverDate").value),
+
+    status: selectedStatus
+  };
+
+  if (!input.friendDate) {
+    el("output").textContent = "";
+    el("count").textContent = "";
+    return;
+  }
+
+  const nick = generateNickname(input);
+
+  el("output").textContent = nick;
+  el("count").textContent = ` (${nick.length}/12)`;
+
+  // Auto copy
+  copyNickname(nick);
+}
